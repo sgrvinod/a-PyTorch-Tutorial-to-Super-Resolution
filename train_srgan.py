@@ -115,7 +115,7 @@ def main():
     for epoch in range(start_epoch, epochs):
 
         # At the halfway point, reduce learning rate to a tenth
-        if epoch == int((iterations / 2) // len(train_loader) + 1):
+        if epoch == iterations / 2 // len(train_loader) + 1:
             adjust_learning_rate(optimizer_g, 0.1)
             adjust_learning_rate(optimizer_d, 0.1)
 
