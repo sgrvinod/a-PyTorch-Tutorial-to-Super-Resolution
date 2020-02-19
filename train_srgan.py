@@ -109,13 +109,13 @@ def main():
                                                pin_memory=True)
 
     # Total number of epochs to train for
-    epochs = iterations // len(train_loader) + 1
+    epochs = int(iterations // len(train_loader) + 1)
 
     # Epochs
     for epoch in range(start_epoch, epochs):
 
         # At the halfway point, reduce learning rate to a tenth
-        if epoch == iterations / 2 // len(train_loader) + 1:
+        if epoch == int((iterations / 2) // len(train_loader) + 1):
             adjust_learning_rate(optimizer_g, 0.1)
             adjust_learning_rate(optimizer_d, 0.1)
 
@@ -248,14 +248,14 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
                   'Data Time {data_time.val:.3f} ({data_time.avg:.3f})----'
                   'Cont. Loss {loss_c.val:.4f} ({loss_c.avg:.4f})----'
                   'Adv. Loss {loss_a.val:.4f} ({loss_a.avg:.4f})----'
-                  'Disc. Loss {loss_d.val:.4f} ({loss_d.avg:.4f})----'.format(epoch,
-                                                                              i,
-                                                                              len(train_loader),
-                                                                              batch_time=batch_time,
-                                                                              data_time=data_time,
-                                                                              loss_c=losses_c,
-                                                                              loss_a=losses_a,
-                                                                              loss_d=losses_d))
+                  'Disc. Loss {loss_d.val:.4f} ({loss_d.avg:.4f})'.format(epoch,
+                                                                          i,
+                                                                          len(train_loader),
+                                                                          batch_time=batch_time,
+                                                                          data_time=data_time,
+                                                                          loss_c=losses_c,
+                                                                          loss_a=losses_a,
+                                                                          loss_d=losses_d))
 
     del lr_imgs, hr_imgs, sr_imgs, hr_imgs_in_vgg_space, sr_imgs_in_vgg_space, hr_discriminated, sr_discriminated  # free some memory since their histories may be stored
 

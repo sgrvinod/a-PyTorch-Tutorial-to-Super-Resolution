@@ -23,7 +23,7 @@ batch_size = 16  # batch size
 start_epoch = 0  # start at this epoch
 iterations = 1e6  # number of training iterations
 workers = 4  # number of workers for loading data in the DataLoader
-print_freq = 1  # print training status once every __ batches
+print_freq = 500  # print training status once every __ batches
 lr = 1e-4  # learning rate
 grad_clip = None  # clip if gradients are exploding
 
@@ -67,7 +67,7 @@ def main():
                                                pin_memory=True)  # note that we're passing the collate function here
 
     # Total number of epochs to train for
-    epochs = iterations // len(train_loader) + 1
+    epochs = int(iterations // len(train_loader) + 1)
 
     # Epochs
     for epoch in range(start_epoch, epochs):
@@ -142,7 +142,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
             print('Epoch: [{0}][{1}/{2}]----'
                   'Batch Time {batch_time.val:.3f} ({batch_time.avg:.3f})----'
                   'Data Time {data_time.val:.3f} ({data_time.avg:.3f})----'
-                  'Loss {loss.val:.4f} ({loss.avg:.4f})----'.format(epoch, i, len(train_loader),
+                  'Loss {loss.val:.4f} ({loss.avg:.4f})'.format(epoch, i, len(train_loader),
                                                                     batch_time=batch_time,
                                                                     data_time=data_time, loss=losses))
     del lr_imgs, hr_imgs, sr_imgs  # free some memory since their histories may be stored
