@@ -276,7 +276,7 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
                                         hr_img_type='imagenet-norm')
             for i, img in enumerate(comb_imgs[::2]):
                 generator.to("cpu")
-                with torch.no_grad:
+                with torch.no_grad():
                     output = generator(transform(img)[1].unsqueeze(0))
                     comb_imgs[i * 2 +1] = tensor_to_img(output)
             generator.to("cuda")
