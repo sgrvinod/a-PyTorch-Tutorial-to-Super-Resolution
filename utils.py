@@ -32,7 +32,7 @@ def create_data_lists(train_folders, test_folders, min_size, output_folder):
     train_images = list()
     for d in train_folders:
         for i in os.listdir(d):
-            if i.endswith('.png'):
+            if i.endswith('.png') or i.endswith('.jpg') or i.endswith('jpeg'):
                 img_path = os.path.join(d, i)
                 img = Image.open(img_path, mode='r')
                 if img.width >= min_size and img.height >= min_size:
@@ -45,7 +45,7 @@ def create_data_lists(train_folders, test_folders, min_size, output_folder):
         test_images = list()
         test_name = d.split("/")[-1]
         for i in os.listdir(d):
-            if i.endswith('.png'):
+            if i.endswith('.png') or i.endswith('.jpg') or i.endswith('jpeg'):
                 img_path = os.path.join(d, i)
                 img = Image.open(img_path, mode='r')
                 if img.width >= min_size and img.height >= min_size:
