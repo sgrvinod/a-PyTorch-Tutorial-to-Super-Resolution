@@ -273,14 +273,16 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
                 comb_imgs[i * 2 +1] = tensor_to_img(output)
             combi_img = combine_image_horizontally(comb_imgs)
             save_img(combi_img, file_name)
-            checkpoint = {
-                'epoch': epoch + 1,
-                'g_state_dict': generator.state_dict(),
-                'd_state_dict': discriminator.state_dict(),
-                'optimizer_g': optimizer_g.state_dict(),
-                'optimizer_d': optimizer_d.state_dict()
-            }
-            torch.save(checkpoint,'ckp/{}_{}_{}.pth.tar'.format(str(epoch).zfill(4), str(i).zfill(6), now)
+            if not (epoch == i == 0):
+                print('save ckp')
+                checkpoint = {
+                    'epoch': epoch + 1,
+                    'g_state_dict': generator.state_dict(),
+                    'd_state_dict': discriminator.state_dict(),
+                    'optimizer_g': optimizer_g.state_dict(),
+                    'optimizer_d': optimizer_d.state_dict()
+                }
+                torch.save(checkpoint,'ckp/{}_{}_{}.pth.tar'.format(str(epoch).zfill(4), str(i).zfill(6), now)
 )
 
 
