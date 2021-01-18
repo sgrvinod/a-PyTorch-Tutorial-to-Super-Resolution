@@ -1,6 +1,9 @@
-from utils import *
+import torch
 from skimage.metrics import peak_signal_noise_ratio, structural_similarity
+from torch.utils.data import DataLoader
+
 from datasets import SRDataset
+from utils import AverageMeter, convert_image
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -20,6 +23,7 @@ srgan_generator = torch.load(srgan_checkpoint)['generator'].to(device)
 srgan_generator.eval()
 model = srgan_generator
 
+
 # Evaluate
 for test_data_name in test_data_names:
     print("\nFor %s:\n" % test_data_name)
@@ -32,7 +36,8 @@ for test_data_name in test_data_names:
                              lr_img_type='imagenet-norm',
                              hr_img_type='[-1, 1]',
                              test_data_name=test_data_name)
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=4,
+
+    test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=4,
                                               pin_memory=True)
 
     # Keep track of the PSNRs and the SSIMs across batches

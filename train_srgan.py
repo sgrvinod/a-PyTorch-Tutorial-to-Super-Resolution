@@ -6,8 +6,8 @@ from datasets import SRDataset
 from utils import *
 
 # Data parameters
-data_folder = './'  # folder with JSON data files
-crop_size = 96  # crop size of target HR images
+data_folder = './data'  # folder with JSON data files
+crop_size = 96*2  # crop size of target HR images
 scaling_factor = 4  # the scaling factor for the generator; the input LR images will be downsampled from the target HR images by this factor
 
 # Generator parameters
@@ -25,7 +25,7 @@ fc_size_d = 1024  # size of the first fully connected layer
 
 # Learning parameters
 checkpoint = None  # path to model (SRGAN) checkpoint, None if none
-batch_size = 16  # batch size
+batch_size = 8  # batch size
 start_epoch = 0  # start at this epoch
 iterations = 2e5  # number of training iterations
 workers = 4  # number of workers for loading data in the DataLoader

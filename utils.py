@@ -9,7 +9,7 @@ import math
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Some constants
-rgb_weights = torch.FloatTensor([65.481, 128.553, 24.966]).to(device)
+rgb_weights = torch.FloatTensor([65.481, 128.553, 24.966]).to("cpu")
 imagenet_mean = torch.FloatTensor([0.485, 0.456, 0.406]).unsqueeze(1).unsqueeze(2)
 imagenet_std = torch.FloatTensor([0.229, 0.224, 0.225]).unsqueeze(1).unsqueeze(2)
 imagenet_mean_cuda = torch.FloatTensor([0.485, 0.456, 0.406]).to(device).unsqueeze(0).unsqueeze(2).unsqueeze(3)
@@ -29,10 +29,11 @@ def create_data_lists(train_folders, test_folders, min_size, output_folder):
     train_images = list()
     for d in train_folders:
         for i in os.listdir(d):
-            img_path = os.path.join(d, i)
-            img = Image.open(img_path, mode='r')
-            if img.width >= min_size and img.height >= min_size:
-                train_images.append(img_path)
+            if i.endswith('.png'):
+                img_path = os.path.join(d, i)
+                img = Image.open(img_path, mode='r')
+                if img.width >= min_size and img.height >= min_size:
+                    train_images.append(img_path)
     print("There are %d images in the training data.\n" % len(train_images))
     with open(os.path.join(output_folder, 'train_images.json'), 'w') as j:
         json.dump(train_images, j)
@@ -41,10 +42,11 @@ def create_data_lists(train_folders, test_folders, min_size, output_folder):
         test_images = list()
         test_name = d.split("/")[-1]
         for i in os.listdir(d):
-            img_path = os.path.join(d, i)
-            img = Image.open(img_path, mode='r')
-            if img.width >= min_size and img.height >= min_size:
-                test_images.append(img_path)
+            if i.endswith('.png'):
+                img_path = os.path.join(d, i)
+                img = Image.open(img_path, mode='r')
+                if img.width >= min_size and img.height >= min_size:
+                    test_images.append(img_path)
         print("There are %d images in the %s test data.\n" % (len(test_images), test_name))
         with open(os.path.join(output_folder, test_name + '_test_images.json'), 'w') as j:
             json.dump(test_images, j)
