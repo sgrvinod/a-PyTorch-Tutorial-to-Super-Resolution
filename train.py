@@ -50,12 +50,6 @@ def main():
     Training.
     """
     global start_epoch, epoch, checkpoint, srresnet_checkpoint
-    test_images = glob('test_images/*.png')
-    comb_imgs = []
-    for f in test_images:
-        img = Image.open(f, mode='r')
-        comb_imgs.append(img)
-        comb_imgs.append(None)
     # Initialize model or load checkpoint
     if checkpoint is None:
         # Generator
@@ -163,6 +157,13 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
     :param epoch: epoch number
     """
     # Set to train mode
+    test_images = glob('test_images/*.png')
+    comb_imgs = []
+    for f in test_images:
+        img = Image.open(f, mode='r')
+        comb_imgs.append(img)
+        comb_imgs.append(None)
+
     generator.train()
     discriminator.train()  # training mode enables batch normalization
 
@@ -268,7 +269,6 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
             print('create test img')
             now=datetime.now().strftime("%Y%m%d-%H:%M:%S")
             file_name = 'test_output/{}_{}_{}.png'.format(str(epoch).zfill(4), str(i).zfill(6), now)
-            comb_imgs = []
             for i, img in enumerate(comb_imgs[::2]):
                 output = generator(img)
                 comb_imgs[i * 2 +1] = tensor_to_img(output)
