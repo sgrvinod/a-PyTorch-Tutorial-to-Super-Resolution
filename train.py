@@ -1,3 +1,5 @@
+from datetime import datetime
+from glob import glob
 import time
 import torch.backends.cudnn as cudnn
 from torch import nn
@@ -33,6 +35,7 @@ vgg19_i = 5  # the index i in the definition for VGG loss; see paper or models.p
 vgg19_j = 4  # the index j in the definition for VGG loss; see paper or models.py
 beta = 1e-3  # the coefficient to weight the adversarial loss in the perceptual loss
 print_freq = 500  # print training status once every __ batches
+test_freq = 2500  # print test results once every __ batches
 lr = 1e-4  # learning rate
 grad_clip = None  # clip if gradients are exploding
 
@@ -47,7 +50,12 @@ def main():
     Training.
     """
     global start_epoch, epoch, checkpoint, srresnet_checkpoint
-
+    test_images = glob('test_images/*.png')
+    comb_imgs = []
+    for f in test_images:
+        img = Image.open(f, mode='r')
+        comb_imgs.append(img)
+        comb_imgs.append(None)
     # Initialize model or load checkpoint
     if checkpoint is None:
         # Generator
@@ -131,12 +139,12 @@ def main():
               epoch=epoch)
 
         # Save checkpoint
-        torch.save({'epoch': epoch,
-                    'generator': generator,
-                    'discriminator': discriminator,
-                    'optimizer_g': optimizer_g,
-                    'optimizer_d': optimizer_d},
-                   'checkpoint_srgan.pth.tar')
+        # torch.save({'epoch': epoch,
+        #             'generator': generator,
+        #             'discriminator': discriminator,
+        #             'optimizer_g': optimizer_g,
+        #             'optimizer_d': optimizer_d},
+        #            'checkpoint_srgan.pth.tar')
 
 
 def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_criterion, adversarial_loss_criterion,
@@ -256,6 +264,25 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
                                                                           loss_c=losses_c,
                                                                           loss_a=losses_a,
                                                                           loss_d=losses_d))
+        if i % test_freq == 0:
+            now=datetime.now().strftime("%Y%m%d-%H:%M:%S")
+            file_name = 'test_output/{}_{}_{}.png'.format(str(epoch).zfill(4), str(i).zfill(6), now)
+            comb_imgs = []
+            for i, img in enumerate(comb_imgs[::2]):
+                output = generator(img)
+                comb_imgs[i * 2 +1] = tensor_to_img(output)
+            combi_img = combine_image_horizontally(comb_imgs)
+            save_img(combi_img, file_name)
+            checkpoint = {
+                'epoch': epoch + 1,
+                'g_state_dict': generator.state_dict(),
+                'd_state_dict': discriminator.state_dict(),
+                'optimizer_g': optimizer_g.state_dict(),
+                'optimizer_d': optimizer_d.state_dict()
+            }
+            torch.save(checkpoint,'ckp/{}_{}_{}.pth.tar'.format(str(epoch).zfill(4), str(i).zfill(6), now)
+)
+
 
     del lr_imgs, hr_imgs, sr_imgs, hr_imgs_in_vgg_space, sr_imgs_in_vgg_space, hr_discriminated, sr_discriminated  # free some memory since their histories may be stored
 

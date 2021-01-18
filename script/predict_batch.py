@@ -8,7 +8,7 @@ from glob import glob
 from typing import List, Tuple
 
 import torch
-from utils import ImageTransforms
+from utils import ImageTransforms, tensor_to_img
 
 device = torch.device("cpu")
 
@@ -73,24 +73,7 @@ def save_tensor(t: torch.Tensor, file_path: str):
     save_img(img=img, file_path=file_path)
 
 
-def tensor_to_img(t: torch.Tensor) -> IMG:
-    if len(t.shape) == 4:
-        array = (t[0].permute(1, 2, 0).numpy())
-    else:
-        assert len(t.shape) == 3
-        array = (t.permute(1, 2, 0).numpy())
-    img = Image.fromarray(np.uint8((array + 1) / 2 * 255))
-    return img
 
-
-def combine_image_horizontally(imgs: List[IMG]) -> IMG:
-    max_size = imgs[-1].size
-    imgs_comb = np.hstack((np.asarray(i.resize(max_size)) for i in imgs))
-    return Image.fromarray(imgs_comb)
-
-
-def save_img(img: IMG, file_path: str):
-    img.save(file_path)
 
 
 all_img_paths = get_all_img_paths('../image_denoise')

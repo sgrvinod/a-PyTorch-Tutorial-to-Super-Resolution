@@ -5,7 +5,10 @@ import random
 import torchvision.transforms.functional as FT
 import torch
 import math
+import numpy as np
+from typing import List, Tuple
 
+IMG = Image.Image
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Some constants
@@ -222,3 +225,21 @@ def adjust_learning_rate(optimizer, shrink_factor):
     for param_group in optimizer.param_groups:
         param_group['lr'] = param_group['lr'] * shrink_factor
     print("The new learning rate is %f\n" % (optimizer.param_groups[0]['lr'],))
+
+def tensor_to_img(t: torch.Tensor) -> IMG:
+    if len(t.shape) == 4:
+        array = (t[0].permute(1, 2, 0).numpy())
+    else:
+        assert len(t.shape) == 3
+        array = (t.permute(1, 2, 0).numpy())
+    img = Image.fromarray(np.uint8((array + 1) / 2 * 255))
+    return img
+
+def combine_image_horizontally(imgs: List[IMG]) -> IMG:
+    max_size = imgs[-1].size
+    imgs_comb = np.hstack((np.asarray(i.resize(max_size)) for i in imgs))
+    return Image.fromarray(imgs_comb)
+
+
+def save_img(img: IMG, file_path: str):
+    img.save(file_path)
