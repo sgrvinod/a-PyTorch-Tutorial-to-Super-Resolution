@@ -265,6 +265,7 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
                                                                           loss_a=losses_a,
                                                                           loss_d=losses_d))
         if i % test_freq == 0:
+            print('create test img')
             now=datetime.now().strftime("%Y%m%d-%H:%M:%S")
             file_name = 'test_output/{}_{}_{}.png'.format(str(epoch).zfill(4), str(i).zfill(6), now)
             comb_imgs = []
