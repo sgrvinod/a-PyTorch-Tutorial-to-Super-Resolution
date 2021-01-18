@@ -275,8 +275,11 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
                                         lr_img_type='imagenet-norm',
                                         hr_img_type='imagenet-norm')
             for i, img in enumerate(comb_imgs[::2]):
-                output = generator(transform(img)[1].unsqueeze(0))
-                comb_imgs[i * 2 +1] = tensor_to_img(output)
+                generator.to("cpu")
+                with torch.no_grad:
+                    output = generator(transform(img)[1].unsqueeze(0))
+                    comb_imgs[i * 2 +1] = tensor_to_img(output)
+            generator.to("cuda")
             combi_img = combine_image_horizontally(comb_imgs)
             save_img(combi_img, file_name)
             if not (epoch == i == 0):
@@ -288,8 +291,9 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
                     'optimizer_g': optimizer_g.state_dict(),
                     'optimizer_d': optimizer_d.state_dict()
                 }
-                torch.save(checkpoint,'ckp/{}_{}_{}.pth.tar'.format(str(epoch).zfill(4), str(i).zfill(6), now)
-)
+                torch.save(checkpoint,'ckp/{}_{}_{}.pth.tar'.format(str(epoch).zfill(4), str(i).zfill(6), now))
+            if "1930" > datetime.now().strftime("%H%M") > "0600":
+                exit()
 
 
     del lr_imgs, hr_imgs, sr_imgs, hr_imgs_in_vgg_space, sr_imgs_in_vgg_space, hr_discriminated, sr_discriminated  # free some memory since their histories may be stored
