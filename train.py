@@ -275,7 +275,7 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
                                         lr_img_type='imagenet-norm',
                                         hr_img_type='imagenet-norm')
             for i, img in enumerate(comb_imgs[::2]):
-                output = generator(transform(img)[1])
+                output = generator(transform(img)[1].unsqueeze(0))
                 comb_imgs[i * 2 +1] = tensor_to_img(output)
             combi_img = combine_image_horizontally(comb_imgs)
             save_img(combi_img, file_name)
