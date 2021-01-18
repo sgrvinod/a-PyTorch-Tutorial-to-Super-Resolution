@@ -269,8 +269,13 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
             print('create test img')
             now=datetime.now().strftime("%Y%m%d-%H:%M:%S")
             file_name = 'test_output/{}_{}_{}.png'.format(str(epoch).zfill(4), str(i).zfill(6), now)
+            transform = ImageTransforms(split='test',
+                                        crop_size=0,
+                                        scaling_factor=4,
+                                        lr_img_type='imagenet-norm',
+                                        hr_img_type='imagenet-norm')
             for i, img in enumerate(comb_imgs[::2]):
-                output = generator(img)
+                output = generator(transform(img)[1])
                 comb_imgs[i * 2 +1] = tensor_to_img(output)
             combi_img = combine_image_horizontally(comb_imgs)
             save_img(combi_img, file_name)
