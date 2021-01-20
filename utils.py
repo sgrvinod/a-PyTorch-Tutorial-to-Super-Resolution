@@ -134,7 +134,7 @@ class ImageTransforms(object):
         self.lr_img_type = lr_img_type
         self.hr_img_type = hr_img_type
         weights = scipy.io.loadmat(path.join('./processing/jpeg_artifacts/weights/q{}.mat'.format(40)))
-        self.denoiser = ARCNN(weights).to(device).eval()
+        self.denoiser = ARCNN(weights).to("cpu").eval()
         assert self.split in {'train', 'test'}
 
     def __call__(self, img):
@@ -171,9 +171,7 @@ class ImageTransforms(object):
         lr_img = convert_image(lr_img, source='pil', target=self.lr_img_type)
         hr_img = convert_image(hr_img, source='pil', target=self.hr_img_type)
         if self.split == "train" and random.random()>0.25:
-            de_lr_img = denoise(lr_img, self.denoiser.to("cpu"))
-            from joblib import dump
-            dump(de_lr_img-lr_img, 'bla.pkl')
+            lr_img = denoise(lr_img, self.denoiser)
         return lr_img, hr_img
 
 
