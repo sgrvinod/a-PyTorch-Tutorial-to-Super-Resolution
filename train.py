@@ -7,9 +7,10 @@ from models import Generator, Discriminator, TruncatedVGG19
 from datasets import SRDataset
 from utils import *
 
+storage = '/storage/ml/dev/users/josh/test/img_test'
 # Data parameters
 data_folder = './data'  # folder with JSON data files
-crop_size = 96*2  # crop size of target HR images
+crop_size = 96 * 2  # crop size of target HR images
 scaling_factor = 4  # the scaling factor for the generator; the input LR images will be downsampled from the target HR images by this factor
 
 # Generator parameters
@@ -25,20 +26,21 @@ n_channels_d = 64  # number of output channels in the first convolutional block,
 n_blocks_d = 8  # number of convolutional blocks
 fc_size_d = 1024  # size of the first fully connected layer
 
-# Learning parameters
-checkpoint = None  # path to model (SRGAN) checkpoint, None if none
-batch_size = 8  # batch size
+# Learning parameter
+ckp_dir = '/storage/ml/dev/users/josh/test/img_test/ckp/'
+# checkpoint = ckp_dir + '0040_000004_20210119-05:51:55.pth.tar'  # path to model (SRGAN) checkpoint, None if none
+checkpoint = None
+batch_size = 24  # batch size
 start_epoch = 0  # start at this epoch
 iterations = 2e5  # number of training iterations
 workers = 4  # number of workers for loading data in the DataLoader
 vgg19_i = 5  # the index i in the definition for VGG loss; see paper or models.py
 vgg19_j = 4  # the index j in the definition for VGG loss; see paper or models.py
 beta = 1e-3  # the coefficient to weight the adversarial loss in the perceptual loss
-print_freq = 500  # print training status once every __ batches
-test_freq = 2500  # print test results once every __ batches
+print_freq = 150  # print training status once every __ batches
+test_freq = 300  # print test results once every __ batches
 lr = 1e-4  # learning rate
 grad_clip = None  # clip if gradients are exploding
-
 # Default device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -132,13 +134,21 @@ def main():
               optimizer_d=optimizer_d,
               epoch=epoch)
 
-        # Save checkpoint
-        # torch.save({'epoch': epoch,
-        #             'generator': generator,
-        #             'discriminator': discriminator,
-        #             'optimizer_g': optimizer_g,
-        #             'optimizer_d': optimizer_d},
-        #            'checkpoint_srgan.pth.tar')
+        if (epoch % 8 == 0) or (epoch in (0, 1, 2)):
+            now = datetime.now().strftime("%Y%m%d-%H:%M:%S")
+            ckp_file = storage + '/ckp/{}_{}.pth.tar'.format(str(epoch).zfill(4), now)
+            print('save ckp')
+            torch.save({'epoch': epoch,
+                        'generator': generator,
+                        'discriminator': discriminator,
+                        'optimizer_g': optimizer_g,
+                        'optimizer_d': optimizer_d},
+                       ckp_file
+                       )
+            generator.to('cuda')
+            discriminator.to('cuda')
+        if "1915" > datetime.now().strftime("%H%M") > "0600":
+            exit()
 
 
 def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_criterion, adversarial_loss_criterion,
@@ -267,7 +277,7 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
                                                                           loss_d=losses_d))
         if i % test_freq == 0:
             print('create test img')
-            now=datetime.now().strftime("%Y%m%d-%H:%M:%S")
+            now = datetime.now().strftime("%Y%m%d-%H:%M:%S")
             file_name = 'test_output/{}_{}_{}.png'.format(str(epoch).zfill(4), str(i).zfill(6), now)
             transform = ImageTransforms(split='test',
                                         crop_size=0,
@@ -278,23 +288,10 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
                 generator.to("cpu")
                 with torch.no_grad():
                     output = generator(transform(img)[1].unsqueeze(0))
-                    comb_imgs[i * 2 +1] = tensor_to_img(output)
+                    comb_imgs[i * 2 + 1] = tensor_to_img(output)
             generator.to("cuda")
             combi_img = combine_image_horizontally(comb_imgs)
             save_img(combi_img, file_name)
-            if not (epoch == i == 0):
-                print('save ckp')
-                checkpoint = {
-                    'epoch': epoch + 1,
-                    'g_state_dict': generator.state_dict(),
-                    'd_state_dict': discriminator.state_dict(),
-                    'optimizer_g': optimizer_g.state_dict(),
-                    'optimizer_d': optimizer_d.state_dict()
-                }
-                torch.save(checkpoint,'ckp/{}_{}_{}.pth.tar'.format(str(epoch).zfill(4), str(i).zfill(6), now))
-            if "1930" > datetime.now().strftime("%H%M") > "0600":
-                exit()
-
 
     del lr_imgs, hr_imgs, sr_imgs, hr_imgs_in_vgg_space, sr_imgs_in_vgg_space, hr_discriminated, sr_discriminated  # free some memory since their histories may be stored
 
