@@ -1,12 +1,17 @@
-from PIL import Image
-import os
 import json
+import os
 import random
-import torchvision.transforms.functional as FT
-import torch
-import math
+from os import path
+from typing import List
+
 import numpy as np
-from typing import List, Tuple
+import scipy.io
+import torch
+import torchvision.transforms.functional as FT
+from PIL import Image
+
+from processing.jpeg_artifacts.model import ARCNN
+from processing.jpeg_artifacts.transform import denoise
 
 IMG = Image.Image
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -128,7 +133,8 @@ class ImageTransforms(object):
         self.scaling_factor = scaling_factor
         self.lr_img_type = lr_img_type
         self.hr_img_type = hr_img_type
-
+        weights = scipy.io.loadmat(path.join('./processing/jpeg_artifacts/weights/q{}.mat'.format(40)))
+        self.denoiser = ARCNN(weights).to(device).eval()
         assert self.split in {'train', 'test'}
 
     def __call__(self, img):
@@ -158,14 +164,16 @@ class ImageTransforms(object):
         # Downsize this crop to obtain a low-resolution version of it
         lr_img = hr_img.resize((int(hr_img.width / self.scaling_factor), int(hr_img.height / self.scaling_factor)),
                                Image.BICUBIC)
-
         # Sanity check
         assert hr_img.width == lr_img.width * self.scaling_factor and hr_img.height == lr_img.height * self.scaling_factor
 
         # Convert the LR and HR image to the required type
         lr_img = convert_image(lr_img, source='pil', target=self.lr_img_type)
         hr_img = convert_image(hr_img, source='pil', target=self.hr_img_type)
-
+        if self.split == "train" and random.random()>0.25:
+            de_lr_img = denoise(lr_img, self.denoiser.to("cpu"))
+            from joblib import dump
+            dump(de_lr_img-lr_img, 'bla.pkl')
         return lr_img, hr_img
 
 
@@ -226,6 +234,7 @@ def adjust_learning_rate(optimizer, shrink_factor):
         param_group['lr'] = param_group['lr'] * shrink_factor
     print("The new learning rate is %f\n" % (optimizer.param_groups[0]['lr'],))
 
+
 def tensor_to_img(t: torch.Tensor) -> IMG:
     if len(t.shape) == 4:
         array = (t[0].permute(1, 2, 0).numpy())
@@ -234,6 +243,7 @@ def tensor_to_img(t: torch.Tensor) -> IMG:
         array = (t.permute(1, 2, 0).numpy())
     img = Image.fromarray(np.uint8((array + 1) / 2 * 255))
     return img
+
 
 def combine_image_horizontally(imgs: List[IMG]) -> IMG:
     max_size = imgs[-1].size
