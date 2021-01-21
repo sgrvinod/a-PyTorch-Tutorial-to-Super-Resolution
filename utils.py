@@ -170,11 +170,10 @@ class ImageTransforms(object):
         # Convert the LR and HR image to the required type
         lr_img = convert_image(lr_img, source='pil', target=self.lr_img_type)
         hr_img = convert_image(hr_img, source='pil', target=self.hr_img_type)
-        if self.split == "train" and random.random()>0.25:
-            de_lr_img = denoise(lr_img, self.denoiser)
-            if (de_lr_img - lr_img).sum() == 0:
-                print("Warning! denoise made no difference")
-            lr_img = de_lr_img
+        if self.split == "train" and random.random() > 0.25:
+            denoise_lr_img = denoise(lr_img, self.denoiser)
+            denoise_ratio = random.random()*0.4 + 0.6
+            lr_img = lr_img * (1 - denoise_ratio) + denoise_lr_img * denoise_ratio
         return lr_img, hr_img
 
 
