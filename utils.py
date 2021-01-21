@@ -174,6 +174,8 @@ class ImageTransforms(object):
             denoise_lr_img = denoise(lr_img, self.denoiser)
             denoise_ratio = random.random()*0.4 + 0.6
             lr_img = lr_img * (1 - denoise_ratio) + denoise_lr_img * denoise_ratio
+            denoise_hr_img = denoise(hr_img, self.denoiser)
+            hr_img = hr_img * 0.9 + denoise_hr_img * 0.1
         return lr_img, hr_img
 
 
