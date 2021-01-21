@@ -171,11 +171,11 @@ class ImageTransforms(object):
         lr_img = convert_image(lr_img, source='pil', target=self.lr_img_type)
         hr_img = convert_image(hr_img, source='pil', target=self.hr_img_type)
         if self.split == "train" and random.random() > 0.25:
+            denoise_ratio = random.random()*0.2 + 0.8
             denoise_lr_img = denoise(lr_img, self.denoiser)
-            denoise_ratio = random.random()*0.4 + 0.6
-            lr_img = lr_img * (1 - denoise_ratio) + denoise_lr_img * denoise_ratio
             denoise_hr_img = denoise(hr_img, self.denoiser)
-            hr_img = hr_img * 0.9 + denoise_hr_img * 0.1
+            lr_img = lr_img * (1 - denoise_ratio) + denoise_lr_img * denoise_ratio
+            hr_img = hr_img * (1 - denoise_ratio) + denoise_hr_img * denoise_ratio
         return lr_img, hr_img
 
 
