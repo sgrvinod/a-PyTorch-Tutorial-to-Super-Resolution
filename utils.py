@@ -261,7 +261,7 @@ def combine_image_horizontally(imgs: List[IMG]) -> IMG:
     for img in imgs:
         new_img = Image.new("RGB", (img.width, max_h))
         new_img.paste(img)
-        arrays.append(np.asarray(img))
+        arrays.append(np.asarray(new_img))
     imgs_comb = np.hstack(arrays)
     return Image.fromarray(imgs_comb)
 
