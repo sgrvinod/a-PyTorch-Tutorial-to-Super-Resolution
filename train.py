@@ -46,7 +46,7 @@ grad_clip = None  # clip if gradients are exploding
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 cudnn.benchmark = True
-log_file = "{}_log.log".format(datetime.now().strftime("%Y_%m_%d_%H_%M_%S"))
+log_file = "log/{}_log.log".format(datetime.now().strftime("%Y_%m_%d_%H_%M_%S"))
 
 def main():
     """
@@ -279,11 +279,12 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
 
         this_log = (epoch, i, batch_time, data_time, losses_c, losses_a, losses_d)
         if os.path.isfile(log_file):
-            with open(log_file, 'wb') as f:
+            with open(log_file, 'rb') as f:
                 log_data = pickle.load(f)
                 for k, this_d in enumerate(this_log):
                     log_data[i].append(this_d)
-                    pickle.dump(log_data, f)
+            with open(log_file, 'wb') as f:
+                pickle.dump(log_data, f)
         else:
             with open(log_file, 'wb') as f:
                 init_log = tuple([d] for d in this_log)
