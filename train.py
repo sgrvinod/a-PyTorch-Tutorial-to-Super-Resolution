@@ -168,7 +168,9 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
     :param epoch: epoch number
     """
     # Set to train mode
-    test_images = glob('test_images/*.png')
+    fixed_test_images = get_all_img_files('test_images/fixed/')
+    other_images = [random.choice(get_all_img_files('test_images'))]
+    test_images = fixed_test_images.extend(other_images)
     comb_imgs = []
     for f in test_images:
         img = Image.open(f, mode='r')

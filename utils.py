@@ -1,6 +1,7 @@
 import json
 import os
 import random
+from glob import glob
 from os import path
 from typing import List
 import scipy.stats as stats
@@ -271,3 +272,7 @@ def save_img(img: IMG, file_path: str):
 
 def tensor_to_np(x):
     return x.detach().cpu().numpy().transpose(1, 2, 0)
+
+def get_all_img_files(img_dir: str):
+    img_type = {'png', 'jpg', 'jpeg'}
+    return sum([glob('{}/*{}'.format(img_dir, t)) for t in img_type], [])
