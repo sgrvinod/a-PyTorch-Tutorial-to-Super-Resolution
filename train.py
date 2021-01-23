@@ -286,7 +286,7 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
                     pickle.dump(log_data, f)
         else:
             with open(log_file, 'wb') as f:
-                init_log = ([d] for d in this_log)
+                init_log = tuple([d] for d in this_log)
                 pickle.dump(init_log, f)
 
         if i % test_freq == 0:
