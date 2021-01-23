@@ -258,7 +258,9 @@ def tensor_to_img(t: torch.Tensor) -> IMG:
 def combine_image_horizontally(imgs: List[IMG]) -> IMG:
     max_h = max([img.height for img in imgs])
     arrays = []
-    for img in imgs:
+    for i, img in enumerate(imgs):
+        if i%2 == 0:
+            img = img.resize(imgs[i+1].size)
         new_img = Image.new("RGB", (img.width, max_h))
         new_img.paste(img)
         arrays.append(np.asarray(new_img))
