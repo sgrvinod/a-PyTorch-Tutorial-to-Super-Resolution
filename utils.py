@@ -2,18 +2,16 @@ import json
 import os
 import random
 from glob import glob
-from os import path
 from typing import List
-import scipy.stats as stats
+
 import numpy as np
-import scipy.io
+import scipy.stats as stats
 import torch
 import torchvision.transforms.functional as FT
 from PIL import Image
+from torchvision import transforms
 
 from processing.add_noise.degrade_funcs import jpeg_blur
-from processing.jpeg_artifacts.model import ARCNN
-from processing.jpeg_artifacts.transform import denoise
 
 IMG = Image.Image
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -136,13 +134,24 @@ class ImageTransforms(object):
         self.lr_img_type = lr_img_type
         self.hr_img_type = hr_img_type
         self.downsample_methods = [Image.NEAREST, Image.BOX,
-                                  Image.BILINEAR, Image.HAMMING,
-                                  Image.BICUBIC, Image.LANCZOS]
+                                   Image.BILINEAR, Image.HAMMING,
+                                   Image.BICUBIC, Image.LANCZOS]
         self.downsample_proba = [0.1, 0.1, 0.2, 0.1, 0.3, 0.2]
-        self.jpeg_quality_dist = stats.truncnorm((1 - 50) / 20, (100 - 50) / 20, loc=50, scale=20)
-        weights = scipy.io.loadmat(path.join('./processing/jpeg_artifacts/weights/q{}.mat'.format(40)))
-        self.denoiser = ARCNN(weights).to("cpu").eval()
+        jpeg_mean, jpeg_std = 50, 25
+
+        self.jpeg_quality_dist = self._jpeg_quality_dist(mean=50, std=25, lower=1, upper=100)
+        # weights = scipy.io.loadmat(path.join('./processing/jpeg_artifacts/weights/q{}.mat'.format(40)))
+        # self.denoiser = ARCNN(weights).to("cpu").eval()
         assert self.split in {'train', 'test'}
+        self.augumentor = transforms.RandomOrder(
+            [
+                transforms.ColorJitter(brightness=0.15, contrast=0.15, saturation=0.15, hue=0.15),
+                transforms.RandomGrayscale(p=0.15),
+                transforms.RandomPerspective(distortion_scale=0.05, p=0.15),
+                transforms.RandomHorizontalFlip(0.25)
+            ]
+
+        )
 
     def __call__(self, img):
         """
@@ -153,11 +162,20 @@ class ImageTransforms(object):
         # Crop
         if self.split == 'train':
             # Take a random fixed-size crop of the image, which will serve as the high-resolution (HR) image
-            left = random.randint(1, img.width - self.crop_size)
-            top = random.randint(1, img.height - self.crop_size)
-            right = left + self.crop_size
-            bottom = top + self.crop_size
+            super_crop = False
+            if random.random() > 0.67:
+                super_crop = True
+                real_crop_size = int((random.random() + 2) * self.crop_size)
+            else:
+                real_crop_size = self.crop_size
+            left = random.randint(1, img.width - real_crop_size)
+            top = random.randint(1, img.height - real_crop_size)
+            right = left + real_crop_size
+            bottom = top + real_crop_size
             hr_img = img.crop((left, top, right, bottom))
+            if super_crop:
+                hr_img = hr_img.resize((self.crop_size, self.crop_size))
+            hr_img = self.augumentor(hr_img)
         else:
             # Take the largest possible center-crop of it such that its dimensions are perfectly divisible by the scaling factor
             x_remainder = img.width % self.scaling_factor
@@ -171,7 +189,7 @@ class ImageTransforms(object):
         # Downsize this crop to obtain a low-resolution version of it
         resize_method = np.random.choice(self.downsample_methods, p=self.downsample_proba)
         new_w, new_h = int(hr_img.width / self.scaling_factor), int(hr_img.height / self.scaling_factor)
-        lr_img = hr_img.resize((new_w, new_h),resize_method)
+        lr_img = hr_img.resize((new_w, new_h), resize_method)
         # Add Jpeg artifacts to lr_img
         if random.random() > 0.25:
             quality = self.jpeg_quality_dist.rvs()
@@ -185,6 +203,9 @@ class ImageTransforms(object):
         lr_img = convert_image(lr_img, source='pil', target=self.lr_img_type)
         hr_img = convert_image(hr_img, source='pil', target=self.hr_img_type)
         return lr_img, hr_img
+
+    def _jpeg_quality_dist(self, mean, std, lower, upper) -> stats.rv_frozen:
+        return stats.truncnorm((lower - mean) / std, (upper - mean) / std, loc=mean, scale=std)
 
 
 class AverageMeter(object):
@@ -259,8 +280,8 @@ def combine_image_horizontally(imgs: List[IMG]) -> IMG:
     max_h = max([img.height for img in imgs])
     arrays = []
     for i, img in enumerate(imgs):
-        if i%2 == 0:
-            img = img.resize(imgs[i+1].size)
+        if i % 2 == 0:
+            img = img.resize(imgs[i + 1].size)
         new_img = Image.new("RGB", (img.width, max_h))
         new_img.paste(img)
         arrays.append(np.asarray(new_img))
@@ -274,6 +295,7 @@ def save_img(img: IMG, file_path: str):
 
 def tensor_to_np(x):
     return x.detach().cpu().numpy().transpose(1, 2, 0)
+
 
 def get_all_img_files(img_dir: str):
     img_type = {'png', 'jpg', 'jpeg'}
