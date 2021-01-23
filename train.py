@@ -284,7 +284,7 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
                 for k, this_d in enumerate(this_log):
                     if isinstance(this_d, AverageMeter):
                         this_d = this_d.val
-                    log_data[i].append(this_d)
+                    log_data[k].append(this_d)
 
             with open(log_file, 'wb') as f:
                 pickle.dump(log_data, f)

@@ -255,8 +255,13 @@ def tensor_to_img(t: torch.Tensor) -> IMG:
 
 
 def combine_image_horizontally(imgs: List[IMG]) -> IMG:
-    max_size = imgs[-1].size
-    imgs_comb = np.hstack((np.asarray(i.resize(max_size)) for i in imgs))
+    max_h = max([img.height for img in imgs])
+    arrays = []
+    for img in imgs:
+        new_img = Image.new("RGB", (img.width, max_h))
+        new_img.paste(img, 0, 0)
+        arrays.append(np.asarray(img))
+    imgs_comb = np.hstack(arrays)
     return Image.fromarray(imgs_comb)
 
 
