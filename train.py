@@ -11,7 +11,7 @@ from utils import *
 storage = '/storage/ml/dev/users/josh/test/img_test'
 # Data parameters
 data_folder = './data'  # folder with JSON data files
-crop_size = 96 * 2  # crop size of target HR images
+crop_size = 96  # crop size of target HR images
 scaling_factor = 4  # the scaling factor for the generator; the input LR images will be downsampled from the target HR images by this factor
 
 # Generator parameters
@@ -31,7 +31,7 @@ fc_size_d = 1024  # size of the first fully connected layer
 ckp_dir = '/storage/ml/dev/users/josh/test/img_test/ckp/'
 # checkpoint = ckp_dir + '0040_000004_20210119-05:51:55.pth.tar'  # path to model (SRGAN) checkpoint, None if none
 checkpoint = None
-batch_size = 24  # batch size
+batch_size = 96  # batch size
 start_epoch = 0  # start at this epoch
 iterations = 2e5  # number of training iterations
 workers = 4  # number of workers for loading data in the DataLoader
