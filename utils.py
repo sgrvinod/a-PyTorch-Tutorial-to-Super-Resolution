@@ -204,7 +204,7 @@ class ImageTransforms(object):
         hr_img = convert_image(hr_img, source='pil', target=self.hr_img_type)
         return lr_img, hr_img
 
-    def _jpeg_quality_dist(self, mean, std, lower, upper) -> stats.rv_frozen:
+    def _jpeg_quality_dist(self, mean: float, std: float, lower: float, upper: float):
         return stats.truncnorm((lower - mean) / std, (upper - mean) / std, loc=mean, scale=std)
 
 
