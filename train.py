@@ -135,7 +135,7 @@ def main():
               optimizer_d=optimizer_d,
               epoch=epoch)
 
-        if (epoch % 10 == 0) or (epoch in (0, 1, 2)):
+        if (epoch % 10 == 0):
             now = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
             ckp_file = storage + '/ckp/{}_{}.pth.tar'.format(str(epoch).zfill(4), now)
             print('save ckp')
