@@ -298,7 +298,7 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
             losses_a.reset()
             losses_c.reset()
 
-        if i % test_freq == 0:
+        if i % test_freq == 0 and epoch % 2 == 0:
             print('create test img')
             now = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
             file_name = 'test_output/{}_{}_{}.png'.format(str(epoch).zfill(4), str(i).zfill(6), now)
