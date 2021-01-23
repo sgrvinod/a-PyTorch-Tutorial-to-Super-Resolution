@@ -147,7 +147,6 @@ class ImageTransforms(object):
             [
                 transforms.ColorJitter(brightness=0.15, contrast=0.15, saturation=0.15, hue=0.15),
                 transforms.RandomGrayscale(p=0.15),
-                transforms.RandomPerspective(distortion_scale=0.05, p=0.15),
                 transforms.RandomHorizontalFlip(0.25)
             ]
 
