@@ -145,7 +145,7 @@ class ImageTransforms(object):
         assert self.split in {'train', 'test'}
         self.augmenter = transforms.RandomOrder(
             [
-                transforms.ColorJitter(brightness=0.15, contrast=0.15, saturation=0.15, hue=0.15),
+                transforms.ColorJitter(brightness=0.15, contrast=0.15, saturation=0.15, hue=0.1),
                 transforms.RandomGrayscale(p=0.15),
                 transforms.RandomHorizontalFlip(0.25)
             ]
@@ -162,11 +162,12 @@ class ImageTransforms(object):
         if self.split == 'train':
             # Take a random fixed-size crop of the image, which will serve as the high-resolution (HR) image
             super_crop = False
-            if random.random() > 0.67:
+            if random.random() > 0.25:
                 super_crop = True
-                real_crop_size = int((random.random() + 2) * self.crop_size)
+                real_crop_size = int((random.random() + 1) * self.crop_size)
             else:
                 real_crop_size = self.crop_size
+            print(real_crop_size)
             left = random.randint(1, img.width - real_crop_size)
             top = random.randint(1, img.height - real_crop_size)
             right = left + real_crop_size
