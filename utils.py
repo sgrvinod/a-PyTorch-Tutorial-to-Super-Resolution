@@ -3,13 +3,14 @@ import os
 import random
 from os import path
 from typing import List
-
+import scipy.stats as stats
 import numpy as np
 import scipy.io
 import torch
 import torchvision.transforms.functional as FT
 from PIL import Image
 
+from processing.add_noise.degrade_funcs import jpeg_blur
 from processing.jpeg_artifacts.model import ARCNN
 from processing.jpeg_artifacts.transform import denoise
 
@@ -133,6 +134,11 @@ class ImageTransforms(object):
         self.scaling_factor = scaling_factor
         self.lr_img_type = lr_img_type
         self.hr_img_type = hr_img_type
+        self.downsample_methods = [Image.NEAREST, Image.BOX,
+                                  Image.BILINEAR, Image.HAMMING,
+                                  Image.BICUBIC, Image.LANCZOS]
+        self.downsample_proba = [0.1, 0.1, 0.2, 0.1, 0.3, 0.2]
+        self.jpeg_quality_dist = stats.truncnorm((0 - 0.5) / 0.2, (1 - 0.5) / 0.2, loc=0.5, scale=0.2)
         weights = scipy.io.loadmat(path.join('./processing/jpeg_artifacts/weights/q{}.mat'.format(40)))
         self.denoiser = ARCNN(weights).to("cpu").eval()
         assert self.split in {'train', 'test'}
@@ -162,20 +168,21 @@ class ImageTransforms(object):
             hr_img = img.crop((left, top, right, bottom))
 
         # Downsize this crop to obtain a low-resolution version of it
-        lr_img = hr_img.resize((int(hr_img.width / self.scaling_factor), int(hr_img.height / self.scaling_factor)),
-                               Image.BICUBIC)
+        resize_method = np.random.choice(self.downsample_methods, p=self.downsample_proba)
+        new_w, new_h = int(hr_img.width / self.scaling_factor), int(hr_img.height / self.scaling_factor)
+        lr_img = hr_img.resize((new_w, new_h),resize_method)
+        # Add Jpeg artifacts to lr_img
+        if random.random() > 0.25:
+            quality = self.jpeg_quality_dist.rvs()
+            lr_img = jpeg_blur(img=lr_img, q=quality)
+
         # Sanity check
-        assert hr_img.width == lr_img.width * self.scaling_factor and hr_img.height == lr_img.height * self.scaling_factor
+        assert hr_img.width == lr_img.width * self.scaling_factor
+        assert hr_img.height == lr_img.height * self.scaling_factor
 
         # Convert the LR and HR image to the required type
         lr_img = convert_image(lr_img, source='pil', target=self.lr_img_type)
         hr_img = convert_image(hr_img, source='pil', target=self.hr_img_type)
-        if self.split == "train" and random.random() > 0.25:
-            denoise_ratio = random.random()*0.2 + 0.8
-            denoise_lr_img = denoise(lr_img, self.denoiser)
-            denoise_hr_img = denoise(hr_img, self.denoiser)
-            lr_img = lr_img * (1 - denoise_ratio) + denoise_lr_img * denoise_ratio
-            hr_img = hr_img * (1 - denoise_ratio) + denoise_hr_img * denoise_ratio
         return lr_img, hr_img
 
 
