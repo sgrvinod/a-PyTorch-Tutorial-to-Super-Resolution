@@ -14,5 +14,5 @@ def jpeg_blur(img: IMG, q: float) -> IMG:
     buf = io.BytesIO()
     imageio.imwrite(buf, img, format='jpg', quality=q)
     s = buf.getbuffer()
-    return imageio.imread(s, format='jpg')
+    return Image.fromarray(imageio.imread(s, format='jpg'))
 

@@ -11,11 +11,7 @@ from torch.utils.data import DataLoader
 
 import model
 from processing.jpeg_artifacts.loader import YcbCrLoader, ycbcr2bgr
-
-
-def tensor_to_np(x):
-    return x.detach().cpu().numpy().transpose(1, 2, 0)
-
+from utils import tensor_to_np
 
 parser = ArgumentParser()
 parser.add_argument('--dir', help='Directory containing input images', default=path.join('.', './test_imgs'))
