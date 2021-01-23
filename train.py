@@ -1,3 +1,4 @@
+import pickle
 from datetime import datetime
 from glob import glob
 import time
@@ -37,15 +38,15 @@ workers = 4  # number of workers for loading data in the DataLoader
 vgg19_i = 5  # the index i in the definition for VGG loss; see paper or models.py
 vgg19_j = 4  # the index j in the definition for VGG loss; see paper or models.py
 beta = 1e-3  # the coefficient to weight the adversarial loss in the perceptual loss
-print_freq = 150  # print training status once every __ batches
-test_freq = 300  # print test results once every __ batches
+print_freq = 100  # print training status once every __ batches
+test_freq = 1000  # print test results once every __ batches
 lr = 1e-4  # learning rate
 grad_clip = None  # clip if gradients are exploding
 # Default device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 cudnn.benchmark = True
-
+log_file = "{}_log.log".format(datetime.now().strftime("%Y_%m_%d_%H_%M_%S"))
 
 def main():
     """
@@ -134,8 +135,8 @@ def main():
               optimizer_d=optimizer_d,
               epoch=epoch)
 
-        if (epoch % 8 == 0) or (epoch in (0, 1, 2)):
-            now = datetime.now().strftime("%Y%m%d-%H:%M:%S")
+        if (epoch % 10 == 0) or (epoch in (0, 1, 2)):
+            now = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
             ckp_file = storage + '/ckp/{}_{}.pth.tar'.format(str(epoch).zfill(4), now)
             print('save ckp')
             torch.save({'epoch': epoch,
@@ -147,8 +148,8 @@ def main():
                        )
             generator.to('cuda')
             discriminator.to('cuda')
-        if "1915" > datetime.now().strftime("%H%M") > "0600":
-            exit()
+        # if "1915" > datetime.now().strftime("%H%M") > "0600":
+        #     exit()
 
 
 def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_criterion, adversarial_loss_criterion,
@@ -275,9 +276,22 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
                                                                           loss_c=losses_c,
                                                                           loss_a=losses_a,
                                                                           loss_d=losses_d))
+
+        this_log = (epoch, i, batch_time, data_time, losses_c, losses_a, losses_d)
+        if os.path.isfile(log_file):
+            with open(log_file, 'wb') as f:
+                log_data = pickle.load(f)
+                for k, this_d in enumerate(this_log):
+                    log_data[i].append(this_d)
+                    pickle.dump(log_data, f)
+        else:
+            with open(log_file, 'wb') as f:
+                init_log = ([d] for d in this_log)
+                pickle.dump(init_log, f)
+
         if i % test_freq == 0:
             print('create test img')
-            now = datetime.now().strftime("%Y%m%d-%H:%M:%S")
+            now = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
             file_name = 'test_output/{}_{}_{}.png'.format(str(epoch).zfill(4), str(i).zfill(6), now)
             transform = ImageTransforms(split='test',
                                         crop_size=0,

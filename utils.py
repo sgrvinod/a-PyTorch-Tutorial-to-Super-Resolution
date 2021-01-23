@@ -169,13 +169,11 @@ class ImageTransforms(object):
 
         # Downsize this crop to obtain a low-resolution version of it
         resize_method = np.random.choice(self.downsample_methods, p=self.downsample_proba)
-        print(resize_method)
         new_w, new_h = int(hr_img.width / self.scaling_factor), int(hr_img.height / self.scaling_factor)
         lr_img = hr_img.resize((new_w, new_h),resize_method)
         # Add Jpeg artifacts to lr_img
         if random.random() > 0.25:
             quality = self.jpeg_quality_dist.rvs()
-            print('jpeg: {}'. format(quality))
             lr_img = jpeg_blur(img=lr_img, q=quality)
 
         # Sanity check
