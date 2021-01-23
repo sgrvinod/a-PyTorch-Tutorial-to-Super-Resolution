@@ -167,7 +167,6 @@ class ImageTransforms(object):
                 real_crop_size = int((random.random() + 1) * self.crop_size)
             else:
                 real_crop_size = self.crop_size
-            print(real_crop_size)
             left = random.randint(1, img.width - real_crop_size)
             top = random.randint(1, img.height - real_crop_size)
             right = left + real_crop_size
