@@ -282,12 +282,15 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
             with open(log_file, 'rb') as f:
                 log_data = pickle.load(f)
                 for k, this_d in enumerate(this_log):
-                    log_data[i].append(float(str(this_d)))
+                    if isinstance(this_d, AverageMeter):
+                        this_d = this_d.val
+                    log_data[i].append(this_d)
+
             with open(log_file, 'wb') as f:
                 pickle.dump(log_data, f)
         else:
             with open(log_file, 'wb') as f:
-                init_log = tuple([float(str(d))] for d in this_log)
+                init_log = tuple([d.val] if isinstance(d, AverageMeter) else [d] for d in this_log)
                 pickle.dump(init_log, f)
 
         if i % test_freq == 0:
