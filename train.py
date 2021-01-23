@@ -240,8 +240,8 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
         # See FAQ section in the tutorial
 
         # Binary Cross-Entropy loss
-        adversarial_loss = adversarial_loss_criterion(sr_discriminated, torch.zeros_like(sr_discriminated)) + \
-                           adversarial_loss_criterion(hr_discriminated, torch.ones_like(hr_discriminated))
+        adversarial_loss = adversarial_loss_criterion(sr_discriminated, 0.1 * torch.rand_like(sr_discriminated)) + \
+                           adversarial_loss_criterion(hr_discriminated, 0.1 * torch.rand_like(hr_discriminated) + 0.9)
 
         # Back-prop.
         optimizer_d.zero_grad()
