@@ -143,7 +143,7 @@ class ImageTransforms(object):
         # weights = scipy.io.loadmat(path.join('./processing/jpeg_artifacts/weights/q{}.mat'.format(40)))
         # self.denoiser = ARCNN(weights).to("cpu").eval()
         assert self.split in {'train', 'test'}
-        self.augumentor = transforms.RandomOrder(
+        self.augmenter = transforms.RandomOrder(
             [
                 transforms.ColorJitter(brightness=0.15, contrast=0.15, saturation=0.15, hue=0.15),
                 transforms.RandomGrayscale(p=0.15),
@@ -174,7 +174,7 @@ class ImageTransforms(object):
             hr_img = img.crop((left, top, right, bottom))
             if super_crop:
                 hr_img = hr_img.resize((self.crop_size, self.crop_size))
-            hr_img = self.augumentor(hr_img)
+            hr_img = self.augmenter(hr_img)
         else:
             # Take the largest possible center-crop of it such that its dimensions are perfectly divisible by the scaling factor
             x_remainder = img.width % self.scaling_factor
