@@ -279,21 +279,24 @@ def train(train_loader, generator, discriminator, truncated_vgg19, content_loss_
                                                                           loss_a=losses_a,
                                                                           loss_d=losses_d))
 
-        this_log = (epoch, i, batch_time, data_time, losses_c, losses_a, losses_d)
-        if os.path.isfile(log_file):
-            with open(log_file, 'rb') as f:
-                log_data = pickle.load(f)
-                for k, this_d in enumerate(this_log):
-                    if isinstance(this_d, AverageMeter):
-                        this_d = this_d.val
-                    log_data[k].append(this_d)
+            this_log = (epoch, i, batch_time, data_time, losses_c, losses_a, losses_d)
+            if os.path.isfile(log_file):
+                with open(log_file, 'rb') as f:
+                    log_data = pickle.load(f)
+                    for k, this_d in enumerate(this_log):
+                        if isinstance(this_d, AverageMeter):
+                            this_d = this_d.avg
+                        log_data[k].append(this_d)
 
-            with open(log_file, 'wb') as f:
-                pickle.dump(log_data, f)
-        else:
-            with open(log_file, 'wb') as f:
-                init_log = tuple([d.val] if isinstance(d, AverageMeter) else [d] for d in this_log)
-                pickle.dump(init_log, f)
+                with open(log_file, 'wb') as f:
+                    pickle.dump(log_data, f)
+            else:
+                with open(log_file, 'wb') as f:
+                    init_log = tuple([d.avg] if isinstance(d, AverageMeter) else [d] for d in this_log)
+                    pickle.dump(init_log, f)
+            losses_c.reset()
+            losses_a.reset()
+            losses_c.reset()
 
         if i % test_freq == 0:
             print('create test img')
