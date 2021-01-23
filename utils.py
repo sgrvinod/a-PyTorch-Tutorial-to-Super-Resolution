@@ -138,7 +138,7 @@ class ImageTransforms(object):
                                   Image.BILINEAR, Image.HAMMING,
                                   Image.BICUBIC, Image.LANCZOS]
         self.downsample_proba = [0.1, 0.1, 0.2, 0.1, 0.3, 0.2]
-        self.jpeg_quality_dist = stats.truncnorm((0 - 0.5) / 0.2, (1 - 0.5) / 0.2, loc=0.5, scale=0.2)
+        self.jpeg_quality_dist = stats.truncnorm((1 - 50) / 20, (100 - 50) / 20, loc=50, scale=20)
         weights = scipy.io.loadmat(path.join('./processing/jpeg_artifacts/weights/q{}.mat'.format(40)))
         self.denoiser = ARCNN(weights).to("cpu").eval()
         assert self.split in {'train', 'test'}
