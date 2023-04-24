@@ -6,7 +6,7 @@ Basic knowledge of PyTorch, convolutional neural networks is assumed.
 
 If you're new to PyTorch, first read [Deep Learning with PyTorch: A 60 Minute Blitz](https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html) and [Learning PyTorch with Examples](https://pytorch.org/tutorials/beginner/pytorch_with_examples.html).
 
-Questions, suggestions, or corrections can be posted as issues.
+Questions, suggestions, or corrections can be posted as [issues](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Super-Resolution/issues).
 
 I'm using `PyTorch 1.4` in `Python 3.6`.
 
