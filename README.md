@@ -541,7 +541,7 @@ Choosing to minimize the binary cross-entropy loss with the desired but *wrong* 
 
 In other words, from this loss formulation, we are using gradient information in the Discriminator – i.e. how the Discriminator's output $P_{HR}$ will respond to changes in the Discriminator's parameters – *not* to update the Discriminator's own parameters, *but rather* to acquire gradient information in the Generator via backpropagation – i.e. how the Discriminator's output $P_{HR}$ will respond to changes in the Generator's parameters – to make the necessary changes to the Generator!
 
-[Earlier]() in the tutorial, we saw how we could minimize a loss function and move towards the desired output by updating only a subnetwork $n$ in a larger network $N$ by freezing the parameters of the subnetwork $N-n$. We are doing exactly the same here, with the Generator and Discriminator combining to form a supernetwork $N$, in which we are only updating the Generator $n$. No doubt the loss would be minimized to a greater extent if we also update the Discriminator $N-n$, but doing so would directly sabotage the Discriminator's discriminating abilities, which is counterproductive. 
+[Earlier](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Super-Resolution#minimizing-loss--a-refresher) in the tutorial, we saw how we could minimize a loss function and move towards the desired output by updating only a subnetwork $n$ in a larger network $N$ by freezing the parameters of the subnetwork $N-n$. We are doing exactly the same here, with the Generator and Discriminator combining to form a supernetwork $N$, in which we are only updating the Generator $n$. No doubt the loss would be minimized to a greater extent if we also update the Discriminator $N-n$, but doing so would directly sabotage the Discriminator's discriminating abilities, which is counterproductive. 
 
 #### Perceptual Loss
 
@@ -702,25 +702,25 @@ This is a custom layer consisting of a **2D convolution to $s^2n$ channels**, wh
 
 See `ResidualBlock` in [`models.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Super-Resolution/blob/master/models.py).
 
-This is a custom layer consisting of two [convolutional blocks](). The first convolutional block is *PReLU*-activated, and the second isn't activated at all. Batch normalization is performed in both. A **residual (skip) connection is applied** across the two convolutional blocks.
+This is a custom layer consisting of two convolutional blocks. The first convolutional block is *PReLU*-activated, and the second isn't activated at all. Batch normalization is performed in both. A **residual (skip) connection is applied** across the two convolutional blocks.
 
 ### SRResNet
 
 See `SRResNet` in [`models.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Super-Resolution/blob/master/models.py).
 
-This **constructs the SRResNet**, [as described](), using convolutional, residual, and sub-pixel convolutional blocks. 
+This **constructs the SRResNet**, [as described](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Super-Resolution#the-srresnet-architecture), using convolutional, residual, and sub-pixel convolutional blocks. 
 
 ### Generator
 
 See `Generator` in [`models.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Super-Resolution/blob/master/models.py).
 
-The Generator of the SRGAN has the **same architecture as the SRResNet**, [as described](), and need not be constructed afresh.
+The Generator of the SRGAN has the **same architecture as the SRResNet**, [as described](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Super-Resolution#the-srresnet-architecture), and need not be constructed afresh.
 
 ### Discriminator
 
 See `Discriminator` in [`models.py`](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Super-Resolution/blob/master/models.py).
 
-This **constructs the Discriminator of the SRGAN**, [as described](), using convolutional blocks and linear layers. 
+This **constructs the Discriminator of the SRGAN**, [as described](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Super-Resolution#the-discriminator-architecture), using convolutional blocks and linear layers. 
 
 An *optional* [`nn.AdaptiveAvgPool2d`](https://pytorch.org/docs/stable/generated/torch.nn.AdaptiveAvgPool2d.html) maintains a fixed image size before it is flattened and passed to the linear layers – this is only required if we don't use the default $96\times96$ HR/SR image size during training.
 
