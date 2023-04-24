@@ -1,5 +1,7 @@
 This is a **[PyTorch](https://pytorch.org) Tutorial to Super-Resolution**.
 
+This is also a tutorial for learning about ***GANs*** and how they work, regardless of intended task or application.
+
 This is the fifth in [a series of tutorials](https://github.com/sgrvinod/Deep-Tutorials-for-PyTorch) I'm writing about _implementing_ cool models on your own with the amazing PyTorch library.
 
 Basic knowledge of PyTorch, convolutional neural networks is assumed.
